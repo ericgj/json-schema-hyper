@@ -1,0 +1,22 @@
+{
+  "name": "json-schema-hyper",
+  "repo": "ericgj/json-schema-hyper",
+  "description": "JSON Schema hypermedia (URI templating)",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+    "ericgj/json-schema-core": "*",  
+    "ericgj/uritemplate": "*",
+    "component/inherit": "*",
+    "component/each": "*",
+    "component/type": "*"
+  },
+  "development": {
+    "timoxley/assert": "*"  
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js"
+  ]
+}
