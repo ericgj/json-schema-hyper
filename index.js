@@ -4,13 +4,13 @@ var core = require('json-schema-core')
   , inherit = require('inherit')
   , each = require('each')
   , type = require('type')
-
+  , has  = Object.hasOwnProperty
 
 // Schema plugin, use like `Schema.use(require('json-schema-hyper'))`
 
 module.exports = function(target){
 
-  target.setType('links', Links);
+  target.addType('links', Links);
 
   target.prototype.resolveLinks = function(instance){
     var links = this.get('links');
@@ -29,8 +29,8 @@ Links.prototype.parse = function(obj){
   this.rootPath = '#';
   this._links = {};
   for (var i=0;i<obj.length;++i){
-    if ("root" == obj.rel){
-      this.rootPath = obj.href;
+    if ("root" == obj[i].rel){
+      this.rootPath = obj[i].href;
       continue;
     }
     var link = obj[i]
@@ -66,7 +66,7 @@ Links.prototype.resolve = function(instance){
     , rootPath = this.rootPath
   each( function(rel,link){
     ret[rel] = link.resolve(instance,rootPath);
-  }
+  })
   return ret;
 }
 
@@ -80,6 +80,7 @@ inherit(Link,Node);
 Link.prototype.parse = function(obj){
   this._attributes = {};
   for (var key in obj) this.set(key,obj[key]);
+  return this;
 }
 
 Link.prototype.each = function(fn){
@@ -101,7 +102,7 @@ Link.prototype.has = function(key){
 Link.prototype.resolve = function(instance,rootPath){
   var root = getPath(instance,rootPath || '#')
     , ret
-  if ('array == type(root)){
+  if ('array' == type(root)){
     ret = [];
     each(root, function(record,i){
       ret.push(resolveFor.call(this,record));
