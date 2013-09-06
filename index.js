@@ -64,7 +64,7 @@ Links.prototype.addLink = function(obj){
 Links.prototype.resolve = function(instance){
   var ret = {}
     , rootPath = this.rootPath
-  each( function(rel,link){
+  this.each( function(rel,link){
     ret[rel] = link.resolve(instance,rootPath);
   })
   return ret;
@@ -104,18 +104,19 @@ Link.prototype.resolve = function(instance,rootPath){
     , ret
   if ('array' == type(root)){
     ret = [];
+    var self = this;
     each(root, function(record,i){
-      ret.push(resolveFor.call(this,record));
+      ret.push(self.resolveFor(record));
     })
   } else {
-    ret = resolveFor.call(this,root);
+    ret = this.resolveFor(root);
   }
   return ret;
 }
 
 Link.prototype.resolveFor = function(instance){
-  var ret = {};
-  ret.href = uritemplate.parse(this.href).expand(obj);
+  var ret = {}, href = this.get('href')
+  ret.href = uritemplate.parse(href).expand(instance);
   this.each(function(key,prop){
     if ("href" == key) return;
     ret[key] = prop;

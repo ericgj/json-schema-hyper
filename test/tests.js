@@ -55,6 +55,70 @@ describe('json-schema-hyper', function(){
 
   })
 
+  describe('resolve links, simple instance', function(){
+
+    beforeEach(function(){
+      this.subject = new Schema().parse(fixtures.parse.simple);
+      this.instance = fixtures.instance.simple;
+    })
+
+    it('should resolve each link', function(){
+      var act = this.subject.resolveLinks(this.instance);
+      console.log("resolved links: %o", act);
+      assert(act.list.href == "http://example.com/thing");
+      assert(act.self.href == "http://example.com/thing/123");
+      assert(act.color.href == "http://example.com/thing/123/color/mauve");
+    })
+
+  })
+
+  describe('resolve links, array instance', function(){
+
+    beforeEach(function(){
+      this.subject = new Schema().parse(fixtures.parse.simple);
+      this.instance = fixtures.instance.multi;
+    })
+
+    it('each link rel should have items for each instance record', function(){
+      var act = this.subject.resolveLinks(this.instance);
+      console.log("resolved links: %o", act);
+      assert(3==act.list.length);
+      assert(3==act.self.length);
+      assert(3==act.color.length);
+    })
+
+    it('should resolve links for each instance record', function(){
+      var act = this.subject.resolveLinks(this.instance);
+      assert(act.list[0].href == "http://example.com/thing");
+      assert(act.self[0].href == "http://example.com/thing/345");
+      assert(act.color[0].href == "http://example.com/thing/345/color/peach");
+      assert(act.list[1].href == "http://example.com/thing");
+      assert(act.self[1].href == "http://example.com/thing/678");
+      assert(act.color[1].href == "http://example.com/thing/678/color/cream");
+      assert(act.list[2].href == "http://example.com/thing");
+      assert(act.self[2].href == "http://example.com/thing/901");
+      assert(act.color[2].href == "http://example.com/thing/901/color/cyan");
+    })
+
+  })
+
+  describe('resolve links, specified root', function(){
+
+    beforeEach(function(){
+      this.subject = new Schema().parse(fixtures.parse.rootlink);
+      this.instance = fixtures.instance.rootlink;
+    })
+
+    it('should resolve each link', function(){
+      var act = this.subject.resolveLinks(this.instance);
+      console.log("resolved links: %o", act);
+      assert(act.list.href == "http://example.com/thing");
+      assert(act.self.href == "http://example.com/thing/123");
+      assert(act.color.href == "http://example.com/thing/123/color/mauve");
+    })
+
+  })
+
 })
 
 fixtures.parse = {};
@@ -70,8 +134,29 @@ fixtures.parse.simple = {
 
 fixtures.parse.rootlink = {
   links: [
+    { rel: "list",  href: "http://example.com/thing" },
     { rel: "self",  href: "http://example.com/thing/{id}" },
     { rel: "color", href: "http://example.com/thing/{id}/color/{color}", mediaType: "application/vnd-color+json" },
     { rel: "root",  href: "#/items/root" } 
   ]
 }
+
+fixtures.instance = {};
+fixtures.instance.simple = {
+  id: 123,
+  color: "mauve"
+}
+
+fixtures.instance.multi = [
+  {  id: 345, color: "peach" },
+  {  id: 678, color: "cream" },
+  {  id: 901, color: "cyan"  }
+]
+
+fixtures.instance.rootlink = {
+  items: {
+    root: fixtures.instance.simple
+  }
+}
+
+
