@@ -28,12 +28,14 @@ inherit(Links,Node);
 Links.prototype.parse = function(obj){
   this.rootPath = '#';
   this._links = {};
+  this.dereference(obj);
   for (var i=0;i<obj.length;++i){
-    if ("root" == obj[i].rel){
-      this.rootPath = obj[i].href;
+    var link = obj[i]
+    if (this.isReference(link)) continue;
+    if ("root" == link.rel){
+      this.rootPath = link.href;
       continue;
     }
-    var link = obj[i]
     this.addLink(link);
   }
   return this;
@@ -74,12 +76,17 @@ Links.prototype.resolve = function(instance){
 function Link(doc,path){
   Node.call(this,doc,path);
   this.nodeType = 'Link';
+  this.setService(this.document.service);
 }
 inherit(Link,Node);
 
 Link.prototype.parse = function(obj){
   this._attributes = {};
-  for (var key in obj) this.set(key,obj[key]);
+  this.dereference(obj);
+  for (var key in obj) {
+    if (this.isReference(obj[key])) continue;
+    this.set(key,obj[key]);
+  }
   return this;
 }
 
@@ -87,20 +94,33 @@ Link.prototype.each = function(fn){
   each(this._attributes,fn);
 }
 
+Link.prototype.attribute = 
 Link.prototype.get = function(key){
   return this._attributes[key];
 }
 
 Link.prototype.set = function(key,val){
-  this._attributes[key] = val;
+  switch(key){
+    case "schema" || "targetSchema":
+      this._attributes[key] = this.parseSchema(val);
+      break;
+    default:
+      this._attributes[key] = val;
+  }
 }
 
 Link.prototype.has = function(key){
   return (has.call(this._attributes,key));
 }
 
+Link.prototype.parseSchema = function(obj){
+  var path = [this.path,key].join('/')
+    , schema = new Schema(this.document,path).parse(obj)
+  return schema;
+}
+
 Link.prototype.resolve = function(instance,rootPath){
-  var root = getPath(instance,rootPath || '#')
+  var root = getPath(instance,rootPath || '#') || instance
     , ret
   if ('array' == type(root)){
     ret = [];
@@ -115,14 +135,72 @@ Link.prototype.resolve = function(instance,rootPath){
 }
 
 Link.prototype.resolveFor = function(instance){
-  var ret = {}, href = this.get('href')
-  ret.href = uritemplate.parse(href).expand(instance);
+  var obj = {}
+    , href = this.get('href')
   this.each(function(key,prop){
-    if ("href" == key) return;
-    ret[key] = prop;
+    if ("href" == key){
+      obj[key] = uritemplate.parse(prop).expand(instance);
+    } else {
+      obj[key] = prop;
+    }
   })
-  return ret;
+  return new Link().parse(obj);
 }
+
+// transport-related methods
+
+Link.prototype.setService = function(service){
+  this.service = service;
+}
+
+Link.prototype.fetch =
+Link.prototype.read = function(params,fn){
+  this.service.get(this._attributes, params, fn);
+}
+
+Link.prototype.create = function(obj,fn){
+  this.service.post(this._attributes, obj, fn);
+}
+
+Link.prototype.update = function(obj,fn){
+  this.service.put(this._attributes, obj, fn);
+}
+
+Link.prototype.del = function(fn){
+  this.service.del(this._attributes, fn);
+}
+
+
+/* Move logic to within service
+
+  Link.prototype.fetch = function(params,fn){
+    if (!this.service) return;
+    if (this.has('schema')) schemaValidate.call(this.get('schema'),params);
+    serviceConfigLink.call(this.service,this);
+    var self = this;
+    this.service.get(this.get('href'), params, function(err,res){
+      // todo handle err
+      if (self.has('targetSchema')) {
+        schemaValidate.call(this.get('targetSchema'),res.body);
+      }
+      fn(res); // probably too low-level here
+    }
+  }
+
+  // private
+
+  function schemaValidate(params){
+    if (!has.call(this,'validate')) return;
+    var errs = this.validate(params);
+    // todo throw error
+  }
+
+  function serviceConfigLink(link){
+    var mediaType = link.get('mediaType')
+    if (mediaType) this.header('Accept',mediaType);
+  }
+
+*/
 
 
 // utils

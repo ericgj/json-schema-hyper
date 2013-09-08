@@ -65,9 +65,14 @@ describe('json-schema-hyper', function(){
     it('should resolve each link', function(){
       var act = this.subject.resolveLinks(this.instance);
       console.log("resolved links: %o", act);
-      assert(act.list.href == "http://example.com/thing");
-      assert(act.self.href == "http://example.com/thing/123");
-      assert(act.color.href == "http://example.com/thing/123/color/mauve");
+      assert(act.list.get('href') == "http://example.com/thing");
+      assert(act.self.get('href') == "http://example.com/thing/123");
+      assert(act.color.get('href') == "http://example.com/thing/123/color/mauve");
+    })
+
+    it('should not resolve link with unknown variable', function(){
+      var act = this.subject.resolveLinks(this.instance);
+      assert(!act.unknown);
     })
 
   })
@@ -112,11 +117,26 @@ describe('json-schema-hyper', function(){
     it('should resolve each link', function(){
       var act = this.subject.resolveLinks(this.instance);
       console.log("resolved links: %o", act);
-      assert(act.list.href == "http://example.com/thing");
-      assert(act.self.href == "http://example.com/thing/123");
-      assert(act.color.href == "http://example.com/thing/123/color/mauve");
+      assert(act.list.get('href') == "http://example.com/thing");
+      assert(act.self.get('href') == "http://example.com/thing/123");
+      assert(act.color.get('href') == "http://example.com/thing/123/color/mauve");
     })
 
+  })
+
+  describe('resolve links, specified root not in instance', function(){
+    beforeEach(function(){
+      this.subject = new Schema().parse(fixtures.parse.rootlink);
+      this.instance = fixtures.instance.simple;
+    })
+
+    it('should resolve against entire instance', function(){
+      var act = this.subject.resolveLinks(this.instance);
+      assert(act.list.get('href') == "http://example.com/thing");
+      assert(act.self.get('href') == "http://example.com/thing/123");
+      assert(act.color.get('href') == "http://example.com/thing/123/color/mauve");
+    })
+ 
   })
 
 })
@@ -128,7 +148,8 @@ fixtures.parse.simple = {
   links: [
     { rel: "list",   href: "http://example.com/thing" },
     { rel: "self",   href: "http://example.com/thing/{id}" },
-    { rel: "color",  href: "http://example.com/thing/{id}/color/{color}", mediaType: "application/vnd-color+json" }
+    { rel: "color",  href: "http://example.com/thing/{id}/color/{color}", mediaType: "application/vnd-color+json" },
+    { rel: "unknown", href: "http://example.com/thing/{foo}" }
   ]
 }
 
