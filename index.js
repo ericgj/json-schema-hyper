@@ -73,14 +73,16 @@ Links.prototype.resolve = function(instance){
     each(root, function(record){
       var links = {}
       self.each(function(rel,link){
-        links[rel] = link.resolve(record);
+        var resolved = link.resolve(record);
+        if (resolved) links[rel] = resolved;
       })
       ret.push(links);
     })
   } else {
     ret = {}
     this.each(function(rel,link){
-      ret[rel] = link.resolve(root);
+      var resolved = link.resolve(root);
+      if (resolved) ret[rel] = resolved;
     })
   }
   return ret;
@@ -136,6 +138,7 @@ Link.prototype.parseSchema = function(obj){
 Link.prototype.resolve = function(instance){
   var obj = {}
     , href = this.get('href')
+  if (!linkTemplateExpandable(href,instance)) return;
   this.each(function(key,prop){
     if ("href" == key){
       obj[key] = uritemplate.parse(prop).expand(instance);
@@ -145,6 +148,21 @@ Link.prototype.resolve = function(instance){
   })
   return new Link().parse(obj);
 }
+
+function linkTemplateExpandable(tmpl,instance){
+  var pattern = /\{([^}]+)\}/g
+    , tokenpatt = /[+#.\/;?&]{0,1}([^*:]+)/i
+    , match
+  while (match = pattern.exec(tmpl)){ 
+    var submatch = tokenpatt.exec(match[1])
+    if (submatch){
+      var token = submatch[1]
+      if (!has.call(instance,token)) return false;
+    }
+  }
+  return true;
+}
+
 
 // transport-related methods
 
