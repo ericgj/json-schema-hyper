@@ -64,11 +64,25 @@ Links.prototype.addLink = function(obj){
 }
 
 Links.prototype.resolve = function(instance){
-  var ret = {}
-    , rootPath = this.rootPath
-  this.each( function(rel,link){
-    ret[rel] = link.resolve(instance,rootPath);
-  })
+  var rootPath = this.rootPath
+    , root = getPath(instance,rootPath || '#') || instance
+    , ret
+  if ('array' == type(root)){
+    ret = []
+    var self = this;
+    each(root, function(record){
+      var links = {}
+      self.each(function(rel,link){
+        links[rel] = link.resolve(record);
+      })
+      ret.push(links);
+    })
+  } else {
+    ret = {}
+    this.each(function(rel,link){
+      ret[rel] = link.resolve(root);
+    })
+  }
   return ret;
 }
 
@@ -119,22 +133,7 @@ Link.prototype.parseSchema = function(obj){
   return schema;
 }
 
-Link.prototype.resolve = function(instance,rootPath){
-  var root = getPath(instance,rootPath || '#') || instance
-    , ret
-  if ('array' == type(root)){
-    ret = [];
-    var self = this;
-    each(root, function(record,i){
-      ret.push(self.resolveFor(record));
-    })
-  } else {
-    ret = this.resolveFor(root);
-  }
-  return ret;
-}
-
-Link.prototype.resolveFor = function(instance){
+Link.prototype.resolve = function(instance){
   var obj = {}
     , href = this.get('href')
   this.each(function(key,prop){

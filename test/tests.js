@@ -84,25 +84,23 @@ describe('json-schema-hyper', function(){
       this.instance = fixtures.instance.multi;
     })
 
-    it('each link rel should have items for each instance record', function(){
+    it('should have array of the same length as the number of instance records', function(){
       var act = this.subject.resolveLinks(this.instance);
       console.log("resolved links: %o", act);
-      assert(3==act.list.length);
-      assert(3==act.self.length);
-      assert(3==act.color.length);
+      assert(3==act.length);
     })
 
     it('should resolve links for each instance record', function(){
       var act = this.subject.resolveLinks(this.instance);
-      assert(act.list[0].href == "http://example.com/thing");
-      assert(act.self[0].href == "http://example.com/thing/345");
-      assert(act.color[0].href == "http://example.com/thing/345/color/peach");
-      assert(act.list[1].href == "http://example.com/thing");
-      assert(act.self[1].href == "http://example.com/thing/678");
-      assert(act.color[1].href == "http://example.com/thing/678/color/cream");
-      assert(act.list[2].href == "http://example.com/thing");
-      assert(act.self[2].href == "http://example.com/thing/901");
-      assert(act.color[2].href == "http://example.com/thing/901/color/cyan");
+      assert(act[0].list.get('href') == "http://example.com/thing");
+      assert(act[0].self.get('href') == "http://example.com/thing/345");
+      assert(act[0].color.get('href') == "http://example.com/thing/345/color/peach");
+      assert(act[1].list.get('href') == "http://example.com/thing");
+      assert(act[1].self.get('href') == "http://example.com/thing/678");
+      assert(act[1].color.get('href') == "http://example.com/thing/678/color/cream");
+      assert(act[2].list.get('href') == "http://example.com/thing");
+      assert(act[2].self.get('href') == "http://example.com/thing/901");
+      assert(act[2].color.get('href') == "http://example.com/thing/901/color/cyan");
     })
 
   })
