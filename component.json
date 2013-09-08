@@ -2,7 +2,7 @@
   "name": "json-schema-hyper",
   "repo": "ericgj/json-schema-hyper",
   "description": "JSON Schema hypermedia (URI templating)",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "keywords": [],
   "dependencies": {
     "ericgj/json-schema-core": "*",  
