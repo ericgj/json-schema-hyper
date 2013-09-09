@@ -4,6 +4,8 @@ var core = require('json-schema-core')
   , inherit = require('inherit')
   , each = require('each')
   , type = require('type')
+  , select = require('select')
+  , find   = require('find')
   , has  = Object.hasOwnProperty
 
 // Schema plugin, use like `Schema.use(require('json-schema-hyper'))`
@@ -22,12 +24,12 @@ module.exports = function(target){
 function Links(doc,path){
   Node.call(this,doc,path);
   this.nodeType = 'Links';
+  this.rootPath = '#';
+  this._links = [];
 }
 inherit(Links,Node);
 
 Links.prototype.parse = function(obj){
-  this.rootPath = '#';
-  this._links = {};
   this.dereference(obj);
   for (var i=0;i<obj.length;++i){
     var link = obj[i]
@@ -41,26 +43,65 @@ Links.prototype.parse = function(obj){
   return this;
 }
 
+// custom finders for typical cases
+
+Links.prototype.rel = function(rel,obj){
+  return this.find( function(link){
+    var found = rel == link.get('rel')
+    if (found && obj){
+      for (var key in obj){
+        if (obj[key] !== link.get(key)){
+          found = false; break;
+        }
+      }
+    }
+    return found;
+  })
+}
+
+Links.prototype.mediaType =
+Links.prototype.alternate = function(mediaType,obj){
+  return this.find( function(link){
+    var found = mediaType == link.get('mediaType')
+    if (found && obj){
+      for (var key in obj){
+        if (obj[key] !== link.get(key)){
+          found = false; break;
+        }
+      }
+    }
+    return found;
+  })
+}
+
+Links.prototype.find = function(fn){
+  return find(this._links,fn);
+}
+
+Links.prototype.select = function(fn){
+  return select(this._links,fn);
+}
+
 Links.prototype.each = function(fn){
   each(this._links,fn);
 }
 
-Links.prototype.get = function(rel){
-  return this._links[rel];
+Links.prototype.get = function(i){
+  return this._links[i];
 }
 
-Links.prototype.set = function(rel,link){
-  this._links[rel] = link;
+Links.prototype.set = function(link){
+  this._links.push(link);
 }
 
-Links.prototype.has = function(rel){
-  return (has.call(this._links,rel));
+Links.prototype.has = function(i){
+  return !!this.get(i);
 }
 
 Links.prototype.addLink = function(obj){
   var path = [this.path,obj.rel].join('/')
     , link = new Link(this.document,path).parse(obj);
-  this.set(obj.rel,link);
+  this.set(link);
 }
 
 Links.prototype.resolve = function(instance){
@@ -71,33 +112,36 @@ Links.prototype.resolve = function(instance){
     ret = []
     var self = this;
     each(root, function(record){
-      var links = {}
-      self.each(function(rel,link){
-        var resolved = link.resolve(record);
-        if (resolved) links[rel] = resolved;
-      })
-      ret.push(links);
+      ret.push( resolvedLinksFor.call(self,record) );
     })
   } else {
-    ret = {}
-    this.each(function(rel,link){
-      var resolved = link.resolve(root);
-      if (resolved) ret[rel] = resolved;
-    })
+    ret = resolvedLinksFor.call(this,root);
   }
   return ret;
 }
+
+// private
+
+function resolvedLinksFor(instance){
+  var ret = new Links();
+  this.each(function(link){
+    var resolved = link.resolve(instance);
+    if (resolved) ret.set(resolved);
+  })
+  return ret;
+}
+
 
 
 function Link(doc,path){
   Node.call(this,doc,path);
   this.nodeType = 'Link';
   this.setService(this.document.service);
+  this._attributes = {};
 }
 inherit(Link,Node);
 
 Link.prototype.parse = function(obj){
-  this._attributes = {};
   this.dereference(obj);
   for (var key in obj) {
     if (this.isReference(obj[key])) continue;
@@ -156,8 +200,10 @@ function linkTemplateExpandable(tmpl,instance){
   while (match = pattern.exec(tmpl)){ 
     var submatch = tokenpatt.exec(match[1])
     if (submatch){
-      var token = submatch[1]
-      if (!has.call(instance,token)) return false;
+      var tokens = submatch[1].split(',');
+      for (var i=0;i<tokens.length;++i){
+        if (!has.call(instance,tokens[i])) return false;
+      }
     }
   }
   return true;

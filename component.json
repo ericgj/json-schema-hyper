@@ -9,7 +9,9 @@
     "ericgj/uritemplate": "*",
     "component/inherit": "*",
     "component/each": "*",
-    "component/type": "*"
+    "component/type": "*",
+    "component/select": "*",
+    "component/find": "*"
   },
   "development": {
     "timoxley/assert": "*"  

@@ -21,10 +21,16 @@ describe('json-schema-hyper', function(){
       console.log("subject: %o", this.subject);
     })
 
-    it('should have links addressable by rel', function(){
-      assert("list" == this.subject.$('#/links/list').get('rel'));
-      assert("http://example.com/thing/{id}" == this.subject.$('#/links/self').get('href'));
-      assert("application/vnd-color+json" == this.subject.$('#/links/color').get('mediaType'));
+    it('links should parse each link', function(){
+      assert(this.subject.get('links').get(0).get('rel'));
+      assert(this.subject.get('links').get(1).get('rel'));
+      assert(this.subject.get('links').get(2).get('rel'));
+    })
+
+    it('should have links addressable from the schema by index', function(){
+      assert("list" == this.subject.$('#/links/0').get('rel'));
+      assert("http://example.com/thing/{id}" == this.subject.$('#/links/1').get('href'));
+      assert("application/vnd-color+json" == this.subject.$('#/links/2').get('mediaType'));
     })
 
     it('should have default root path (#)', function(){
@@ -62,17 +68,41 @@ describe('json-schema-hyper', function(){
       this.instance = fixtures.instance.simple;
     })
 
-    it('should resolve each link', function(){
+    it('should return a links collection object', function(){
       var act = this.subject.resolveLinks(this.instance);
       console.log("resolved links: %o", act);
-      assert(act.list.get('href') == "http://example.com/thing");
-      assert(act.self.get('href') == "http://example.com/thing/123");
-      assert(act.color.get('href') == "http://example.com/thing/123/color/mauve");
+      assert(act.rel('self'));
     })
 
-    it('should not resolve link with unknown variable', function(){
+    it('should resolve each link', function(){
       var act = this.subject.resolveLinks(this.instance);
-      assert(!act.unknown);
+      assert(act.$('0/href') == "http://example.com/thing");
+      assert(act.$('1/href') == "http://example.com/thing/123");
+      assert(act.$('2/href') == "http://example.com/thing/123/color/mauve");
+    })
+
+  })
+
+  describe('resolve links, simple instance, unknown variables in templates', function(){
+
+    beforeEach(function(){
+      this.subject = new Schema().parse(fixtures.parse.unknowns);
+      this.instance = fixtures.instance.simple;
+    })
+
+    it('should not resolve links with unknown variable', function(){
+      var act = this.subject.resolveLinks(this.instance);
+      console.log("resolved links: %o", act);
+      act.each( function(link){
+        assert(link.get('rel') !== 'one');
+        assert(link.get('rel') !== 'two');
+        assert(link.get('rel') !== 'three');
+      })
+    })
+
+    it('should resolve links with known variables in comma-delimited list', function(){
+      var act = this.subject.resolveLinks(this.instance);
+      assert(act.get(0).get('rel') == 'ok');
     })
 
   })
@@ -92,15 +122,15 @@ describe('json-schema-hyper', function(){
 
     it('should resolve links for each instance record', function(){
       var act = this.subject.resolveLinks(this.instance);
-      assert(act[0].list.get('href') == "http://example.com/thing");
-      assert(act[0].self.get('href') == "http://example.com/thing/345");
-      assert(act[0].color.get('href') == "http://example.com/thing/345/color/peach");
-      assert(act[1].list.get('href') == "http://example.com/thing");
-      assert(act[1].self.get('href') == "http://example.com/thing/678");
-      assert(act[1].color.get('href') == "http://example.com/thing/678/color/cream");
-      assert(act[2].list.get('href') == "http://example.com/thing");
-      assert(act[2].self.get('href') == "http://example.com/thing/901");
-      assert(act[2].color.get('href') == "http://example.com/thing/901/color/cyan");
+      assert(act[0].get(0).get('href') == "http://example.com/thing");
+      assert(act[0].get(1).get('href') == "http://example.com/thing/345");
+      assert(act[0].get(2).get('href') == "http://example.com/thing/345/color/peach");
+      assert(act[1].get(0).get('href') == "http://example.com/thing");
+      assert(act[1].get(1).get('href') == "http://example.com/thing/678");
+      assert(act[1].get(2).get('href') == "http://example.com/thing/678/color/cream");
+      assert(act[2].get(0).get('href') == "http://example.com/thing");
+      assert(act[2].get(1).get('href') == "http://example.com/thing/901");
+      assert(act[2].get(2).get('href') == "http://example.com/thing/901/color/cyan");
     })
 
   })
@@ -115,14 +145,15 @@ describe('json-schema-hyper', function(){
     it('should resolve each link', function(){
       var act = this.subject.resolveLinks(this.instance);
       console.log("resolved links: %o", act);
-      assert(act.list.get('href') == "http://example.com/thing");
-      assert(act.self.get('href') == "http://example.com/thing/123");
-      assert(act.color.get('href') == "http://example.com/thing/123/color/mauve");
+      assert(act.get(0).get('href') == "http://example.com/thing");
+      assert(act.get(1).get('href') == "http://example.com/thing/123");
+      assert(act.get(2).get('href') == "http://example.com/thing/123/color/mauve");
     })
 
   })
 
   describe('resolve links, specified root not in instance', function(){
+    
     beforeEach(function(){
       this.subject = new Schema().parse(fixtures.parse.rootlink);
       this.instance = fixtures.instance.simple;
@@ -130,11 +161,73 @@ describe('json-schema-hyper', function(){
 
     it('should resolve against entire instance', function(){
       var act = this.subject.resolveLinks(this.instance);
-      assert(act.list.get('href') == "http://example.com/thing");
-      assert(act.self.get('href') == "http://example.com/thing/123");
-      assert(act.color.get('href') == "http://example.com/thing/123/color/mauve");
+      assert(act.get(0).get('href') == "http://example.com/thing");
+      assert(act.get(1).get('href') == "http://example.com/thing/123");
+      assert(act.get(2).get('href') == "http://example.com/thing/123/color/mauve");
     })
  
+  })
+
+  describe('find link by rel', function(){
+
+    beforeEach(function(){
+      this.subject = new Schema().parse(fixtures.parse.alternates);
+    })
+   
+    it('should find link by rel when rel unique', function(){
+      var links = this.subject.get('links')
+        , act = links.rel('self')
+      assert(links.get(0) === act);
+      assert("http://example.com/thing/{id}" == act.get('href'));
+    })
+
+    it('should find first link by rel when rel not unique', function(){
+      var links = this.subject.get('links')
+        , act = links.rel('alternate')
+      assert(links.get(1) === act);
+      assert("http://example.com/thing/{id}" == act.get('href'));
+      assert("application/xml" == act.get('mediaType'));
+    })
+
+    it('should find link by rel and other criteria if specified', function(){
+      var links = this.subject.get('links')
+        , act = links.rel('alternate', {href: 'http://example.com/thing/{id};xml'})
+      assert(links.get(2) === act);
+      assert("http://example.com/thing/{id};xml" == act.get('href'));
+      assert("application/xml" == act.get('mediaType'));
+    })
+    
+    it('should return undefined if rel not found', function(){
+      var links = this.subject.get('links')
+        , act = links.rel('alternate', {mediaType: 'application/atom+xml'})
+      assert(act === undefined);
+    })
+
+  })
+
+  describe('find link by mediaType', function(){
+    beforeEach(function(){
+      this.subject = new Schema().parse(fixtures.parse.alternates);
+    })
+   
+    it('should find link by mediaType when mediaType unique', function(){
+      var links = this.subject.get('links')
+        , act = links.mediaType('text/html')
+      assert(links.get(3) === act);
+    })
+
+    it('should find first link by mediaType when mediaType not unique', function(){
+      var links = this.subject.get('links')
+        , act = links.mediaType('application/xml')
+      assert(links.get(1) === act);
+    })
+
+    it('should find link by mediaType and other criteria if specified', function(){
+      var links = this.subject.get('links')
+        , act = links.alternate('application/xml', {href: 'http://example.com/thing/{id};xml'})
+      assert(links.get(2) === act);
+    })
+
   })
 
 })
@@ -146,8 +239,7 @@ fixtures.parse.simple = {
   links: [
     { rel: "list",   href: "http://example.com/thing" },
     { rel: "self",   href: "http://example.com/thing/{id}" },
-    { rel: "color",  href: "http://example.com/thing/{id}/color/{color}", mediaType: "application/vnd-color+json" },
-    { rel: "unknown", href: "http://example.com/thing/{foo}" }
+    { rel: "color",  href: "http://example.com/thing/{id}/color/{color}", mediaType: "application/vnd-color+json" }
   ]
 }
 
@@ -157,6 +249,24 @@ fixtures.parse.rootlink = {
     { rel: "self",  href: "http://example.com/thing/{id}" },
     { rel: "color", href: "http://example.com/thing/{id}/color/{color}", mediaType: "application/vnd-color+json" },
     { rel: "root",  href: "#/items/root" } 
+  ]
+}
+
+fixtures.parse.unknowns = {
+  links: [
+    { rel: "one", href: "http://example.com/{one}"    },
+    { rel: "two", href: "http://example.com/{/two:3}" },
+    { rel: "three", href: "http://example.com{?id,color,three}" },
+    { rel: "ok",  href: "http://example.com{?id,color}" }
+  ]
+}
+
+fixtures.parse.alternates = {
+  links: [
+    { rel: "self",        href: "http://example.com/thing/{id}" },
+    { rel: "alternate",   href: "http://example.com/thing/{id}", mediaType: "application/xml" },
+    { rel: "alternate",   href: "http://example.com/thing/{id};xml", mediaType: "application/xml" },
+    { rel: "alternate",   href: "http://example.com/thing/{id}", mediaType: "text/html" }
   ]
 }
 
