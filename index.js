@@ -13,6 +13,7 @@ var core = require('json-schema-core')
 module.exports = function(target){
 
   target.addType('links', Links);
+  target.addType('media', Media);
 
   target.prototype.resolveLinks = function(instance){
     var links = this.get('links');
@@ -267,6 +268,40 @@ Link.prototype.del = function(fn){
   }
 
 */
+
+
+function Media(doc,path){
+  Node.call(this,doc,path);
+  this.nodeType = "Media";
+  this._attributes = {};
+}
+inherit(Media,Node);
+
+Media.prototype.parse = function(obj){
+  this.dereference(obj);
+  for (var key in obj){
+    var attr = obj[key];
+    if (this.isReference(attr)) continue;
+    this.set(key,attr);
+  }
+  return this;
+}
+
+Media.prototype.each = function(fn){
+  each(this._attributes, fn);
+}
+
+Media.prototype.get = function(key){
+  return this._attributes[key];
+}
+
+Media.prototype.set = function(key,val){
+  this._attributes[key] = val;
+}
+
+Media.prototype.has = function(key){
+  return (has.call(this._attributes,key));
+}
 
 
 // utils
