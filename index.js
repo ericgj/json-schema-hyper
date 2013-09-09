@@ -59,8 +59,7 @@ Links.prototype.rel = function(rel,obj){
   })
 }
 
-Links.prototype.mediaType =
-Links.prototype.alternate = function(mediaType,obj){
+Links.prototype.mediaType = function(mediaType,obj){
   return this.find( function(link){
     var found = mediaType == link.get('mediaType')
     if (found && obj){
@@ -72,6 +71,10 @@ Links.prototype.alternate = function(mediaType,obj){
     }
     return found;
   })
+}
+
+Links.prototype.alternate = function(mediaType,obj){
+  return this.mediaType(mediaType, {rel: 'alternate'});
 }
 
 Links.prototype.find = function(fn){

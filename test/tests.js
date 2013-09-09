@@ -224,7 +224,7 @@ describe('json-schema-hyper', function(){
 
     it('should find link by mediaType and other criteria if specified', function(){
       var links = this.subject.get('links')
-        , act = links.alternate('application/xml', {href: 'http://example.com/thing/{id};xml'})
+        , act = links.mediaType('application/xml', {href: 'http://example.com/thing/{id};xml'})
       assert(links.get(2) === act);
     })
 
