@@ -6,7 +6,7 @@ JSON Hyper-Schema, as specified in the [IETF Draft spec][spec].
 This component extends the behavior of JSON Schema, as implemented in 
 [json-schema-core][core], providing 
 
-- parser classes for links (`Links`, `Link`) and `Media` 
+- parser classes for links (`Links`, `Link`) and media. 
 - a method for resolving link templates against an instance (`resolveLinks`)
 - CRUD methods on link objects (`link.fetch`, `link.create`, `link.update`,
 `link.del`) which implement features of the spec such as `schema` and 
@@ -15,7 +15,7 @@ This component extends the behavior of JSON Schema, as implemented in
 as well as generic `links.find(fn)` and `links.select(fn)`
 - addressability from the schema (e.g. `schema.$('#/links/0')`)
 - dereferencing JSON references used in either "links" itself or in 
-individual links or link attributes.
+individual links or link attributes, or in "media" subtrees.
 
 
 ## Installation
