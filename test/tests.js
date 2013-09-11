@@ -230,6 +230,31 @@ describe('json-schema-hyper', function(){
 
   })
 
+  describe('correlations', function(){
+    beforeEach(function(){
+      var schema = new Schema().parse(fixtures.parse.simple);
+      this.subject = schema.bind(fixtures.instance.simple);
+    })
+
+    it('correlation should resolve each link', function(){
+      var act = this.subject.links();
+      assert(act.$('0/href') == "http://example.com/thing");
+      assert(act.$('1/href') == "http://example.com/thing/123");
+      assert(act.$('2/href') == "http://example.com/thing/123/color/mauve");
+    })
+
+    it('correlation should find link by rel', function(){
+      var act = this.subject.rel('color')
+      assert(act.get('href') == "http://example.com/thing/123/color/mauve");
+    })
+
+    it('correlation should find link by mediaType', function(){
+      var act = this.subject.mediaType('application/vnd-color+json')
+      assert(act.get('href') == "http://example.com/thing/123/color/mauve");
+    })
+
+  })
+
 })
 
 fixtures.parse = {};

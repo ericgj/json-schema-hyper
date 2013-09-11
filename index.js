@@ -15,12 +15,41 @@ module.exports = function(target){
   target.addType('links', Links);
   target.addType('media', Media);
 
+  target.addBinding('links', linksBinding);
+  target.addBinding('rel', relBinding);
+  target.addBinding('mediaType', mediaTypeBinding);
+  target.addBinding('alternate', alternateBinding);
+
   target.prototype.resolveLinks = function(instance){
     var links = this.get('links');
     if (!links) return;
     return links.resolve(instance);
   }
+
 }
+
+/* functions to be bound to Correlation objects */
+
+function linksBinding(){
+  return this.schema.resolveLinks(this.instance);
+}
+
+function relBinding(rel,filter){
+  var links = this.links();
+  return links.rel(rel,filter);
+}
+
+function mediaTypeBinding(mediaType,filter){
+  var links = this.links();
+  return links.mediaType(mediaType,filter);
+}
+
+function alternateBinding(mediaType){
+  var links = this.links();
+  return links.alternate(mediaType);
+}
+
+
 
 function Links(doc,path){
   Node.call(this,doc,path);
@@ -74,7 +103,7 @@ Links.prototype.mediaType = function(mediaType,obj){
   })
 }
 
-Links.prototype.alternate = function(mediaType,obj){
+Links.prototype.alternate = function(mediaType){
   return this.mediaType(mediaType, {rel: 'alternate'});
 }
 
