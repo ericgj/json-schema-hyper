@@ -177,6 +177,7 @@ inherit(Link,Node);
 
 Link.prototype.parse = function(obj){
   this.dereference(obj);
+  this.set('method','GET');  // default
   for (var key in obj) {
     if (this.isReference(obj[key])) continue;
     this.set(key,obj[key]);

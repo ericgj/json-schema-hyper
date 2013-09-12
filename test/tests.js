@@ -36,6 +36,12 @@ describe('json-schema-hyper', function(){
     it('should have default root path (#)', function(){
       assert('#' == this.subject.get('links').rootPath);
     })
+    
+    it('links should default method to GET', function(){
+      assert('GET' == this.subject.get('links').get(0).get('method'));
+      assert('GET' == this.subject.get('links').get(1).get('method'));
+      assert('GET' == this.subject.get('links').get(2).get('method'));
+    })
 
   })
 
