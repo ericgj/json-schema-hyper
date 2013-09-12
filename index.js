@@ -64,7 +64,7 @@ Links.prototype.parse = function(obj){
   for (var i=0;i<obj.length;++i){
     var link = obj[i]
     if (this.isReference(link)) continue;
-    if ("root" == link.rel){
+    if ("root" == link.rel.toLowerCase()){
       this.rootPath = link.href;
       continue;
     }
@@ -77,6 +77,7 @@ Links.prototype.parse = function(obj){
 
 Links.prototype.rel = function(rel,obj){
   return this.find( function(link){
+    rel = rel.toLowerCase();
     var found = rel == link.get('rel')
     if (found && obj){
       for (var key in obj){
@@ -132,7 +133,7 @@ Links.prototype.has = function(i){
 }
 
 Links.prototype.addLink = function(obj){
-  var path = [this.path,obj.rel].join('/')
+  var path = [this.path,this._links.length].join('/')
     , link = new Link(this.document,path).parse(obj);
   this.set(link);
 }
@@ -195,7 +196,10 @@ Link.prototype.get = function(key){
 Link.prototype.set = function(key,val){
   switch(key){
     case "schema" || "targetSchema":
-      this._attributes[key] = this.parseSchema(val);
+      this._attributes[key] = this.parseSchema(key,val);
+      break;
+    case "rel":
+      this._attributes[key] = val.toLowerCase();
       break;
     default:
       this._attributes[key] = val;
@@ -206,7 +210,7 @@ Link.prototype.has = function(key){
   return (has.call(this._attributes,key));
 }
 
-Link.prototype.parseSchema = function(obj){
+Link.prototype.parseSchema = function(key,obj){
   var path = [this.path,key].join('/')
     , schema = new Schema(this.document,path).parse(obj)
   return schema;

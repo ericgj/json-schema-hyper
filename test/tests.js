@@ -203,6 +203,7 @@ describe('json-schema-hyper', function(){
       assert(act === undefined);
     })
 
+
   })
 
   describe('find link by mediaType', function(){
@@ -230,6 +231,30 @@ describe('json-schema-hyper', function(){
 
   })
 
+  describe('rel case-insensitivity', function(){
+
+    it('should find link by rel case-insensitively', function(){
+      this.subject = new Schema().parse(fixtures.parse.simple);
+      var links = this.subject.get('links')
+        , act = links.rel('SELF')
+      assert(links.get(1) === act);
+      assert("http://example.com/thing/{id}" == act.get('href'));
+    })
+
+    it('should get link rels as lower-cased', function(){
+      this.subject = new Schema().parse(fixtures.parse.caseInsensitive);
+      var links = this.subject.get('links')
+      assert(links.get(0).get('rel') == 'list');
+      assert(links.get(1).get('rel') == 'self');
+      assert(links.get(2).get('rel') == 'color');
+    })
+
+  })
+
+  describe('link schema and targetSchema parsing', function(){
+    it('should have tests');
+  })
+  
   describe('correlations', function(){
     beforeEach(function(){
       var schema = new Schema().parse(fixtures.parse.simple);
@@ -292,6 +317,14 @@ fixtures.parse.alternates = {
     { rel: "alternate",   href: "http://example.com/thing/{id}", mediaType: "application/xml" },
     { rel: "alternate",   href: "http://example.com/thing/{id};xml", mediaType: "application/xml" },
     { rel: "alternate",   href: "http://example.com/thing/{id}", mediaType: "text/html" }
+  ]
+}
+
+fixtures.parse.caseInsensitive = {
+  links: [
+    { rel: "LIST",  href: "http://example.com/thing" },
+    { rel: "Self",  href: "http://example.com/thing/{id}" },
+    { rel: "coLOR", href: "http://example.com/thing/{id}/color/{color}", mediaType: "application/vnd-color+json" },
   ]
 }
 
