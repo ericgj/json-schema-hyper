@@ -28,7 +28,7 @@ module.exports = function(target){
 
 }
 
-/* functions to be bound to Correlation objects */
+///// methods to be bound to Correlation objects
 
 function linksBinding(){
   return this.schema.resolveLinks(this.instance);
@@ -50,6 +50,7 @@ function alternateBinding(mediaType){
 }
 
 
+///// Links
 
 function Links(doc,path){
   Node.call(this,doc,path);
@@ -165,12 +166,11 @@ function resolvedLinksFor(instance){
   return ret;
 }
 
-
+///// Link
 
 function Link(doc,path){
   Node.call(this,doc,path);
   this.nodeType = 'Link';
-  this.setService(this.document.service);
   this._attributes = {};
 }
 inherit(Link,Node);
@@ -248,61 +248,7 @@ function linkTemplateExpandable(tmpl,instance){
 }
 
 
-// transport-related methods
-
-Link.prototype.setService = function(service){
-  this.service = service;
-}
-
-Link.prototype.fetch =
-Link.prototype.read = function(params,fn){
-  this.service.get(this._attributes, params, fn);
-}
-
-Link.prototype.create = function(obj,fn){
-  this.service.post(this._attributes, obj, fn);
-}
-
-Link.prototype.update = function(obj,fn){
-  this.service.put(this._attributes, obj, fn);
-}
-
-Link.prototype.del = function(fn){
-  this.service.del(this._attributes, fn);
-}
-
-
-/* Move logic to within service
-
-  Link.prototype.fetch = function(params,fn){
-    if (!this.service) return;
-    if (this.has('schema')) schemaValidate.call(this.get('schema'),params);
-    serviceConfigLink.call(this.service,this);
-    var self = this;
-    this.service.get(this.get('href'), params, function(err,res){
-      // todo handle err
-      if (self.has('targetSchema')) {
-        schemaValidate.call(this.get('targetSchema'),res.body);
-      }
-      fn(res); // probably too low-level here
-    }
-  }
-
-  // private
-
-  function schemaValidate(params){
-    if (!has.call(this,'validate')) return;
-    var errs = this.validate(params);
-    // todo throw error
-  }
-
-  function serviceConfigLink(link){
-    var mediaType = link.get('mediaType')
-    if (mediaType) this.header('Accept',mediaType);
-  }
-
-*/
-
+//////// Media
 
 function Media(doc,path){
   Node.call(this,doc,path);
