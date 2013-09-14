@@ -211,6 +211,10 @@ Link.prototype.has = function(key){
   return (has.call(this._attributes,key));
 }
 
+Link.prototype.attributes = function(){
+  return this._attributes;
+}
+
 Link.prototype.parseSchema = function(key,obj){
   var path = [this.path,key].join('/')
     , schema = new Schema(this.document,path).parse(obj)
