@@ -36,17 +36,41 @@ function linksBinding(){
 
 function relBinding(rel,filter){
   var links = this.links();
-  return links.rel(rel,filter);
+  if ('array' == type(links)){
+    var ret = []
+    for (var i=0;i<links.length;++i){
+      ret.push(links[i].rel(rel,filter));
+    }
+    return ret;
+  } else {
+    return links.rel(rel,filter);
+  }
 }
 
 function mediaTypeBinding(mediaType,filter){
   var links = this.links();
-  return links.mediaType(mediaType,filter);
+  if ('array' == type(links)){
+    var ret = []
+    for (var i=0;i<links.length;++i){
+      ret.push(links[i].mediaType(mediaType,filter));
+    }
+    return ret;
+  } else {
+    return links.mediaType(mediaType,filter);
+  }
 }
 
 function alternateBinding(mediaType){
   var links = this.links();
-  return links.alternate(mediaType);
+  if ('array' == type(links)){
+    var ret = []
+    for (var i=0;i<links.length;++i){
+      ret.push(links[i].alternate(mediaType));
+    }
+    return ret;
+  } else {
+    return links.alternate(mediaType);
+  }
 }
 
 

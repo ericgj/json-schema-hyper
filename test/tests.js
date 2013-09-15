@@ -2,6 +2,7 @@ var assert = require('timoxley-assert')
   , core  = require('json-schema-core')
   , links = require('json-schema-hyper')
   , Schema = core.Schema
+  , type = require('type')
 
 Schema.use(links);
 
@@ -285,6 +286,35 @@ describe('json-schema-hyper', function(){
     })
 
   })
+
+  describe('correlations, array instance', function(){
+    beforeEach(function(){
+      var schema = new Schema().parse(fixtures.parse.simple);
+      this.subject = schema.bind(fixtures.instance.multi);
+    })
+
+    it('links should return array of resolved links for each element of array', function(){
+      var act = this.subject.links();
+      assert('array' == type(act));
+      assert(act[2].$('0/href') == "http://example.com/thing");
+      assert(act[2].$('1/href') == "http://example.com/thing/901");
+      assert(act[2].$('2/href') == "http://example.com/thing/901/color/cyan");
+    })
+
+    it('correlation should return array of found link by rel', function(){
+      var act = this.subject.rel('color')
+      assert('array' == type(act));
+      assert(act[1].get('href') == "http://example.com/thing/678/color/cream");
+    })
+
+    it('correlation should return array of found link by mediaType', function(){
+      var act = this.subject.mediaType('application/vnd-color+json')
+      assert('array' == type(act));
+      assert(act[0].get('href') == "http://example.com/thing/345/color/peach");
+    })
+
+  })
+
 
 })
 
