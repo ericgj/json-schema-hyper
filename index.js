@@ -19,6 +19,7 @@ module.exports = function(target){
   target.addBinding('rel', relBinding);
   target.addBinding('mediaType', mediaTypeBinding);
   target.addBinding('alternate', alternateBinding);
+  target.addBinding('getRoot', getRootBinding);
 
   target.prototype.resolveLinks = function(instance){
     var links = this.get('links');
@@ -73,13 +74,23 @@ function alternateBinding(mediaType){
   }
 }
 
+// this is assuming the schema describes the whole instance, not already
+// the root instance.
+
+function getRootBinding(){
+  if (!(this.schema && this.instance)) return;
+  var root = this.rel('root')
+  if (!root) return this;
+  return this.getPath(root.get('href')); 
+}
+
+  
 
 ///// Links
 
 function Links(doc,path){
   Node.call(this,doc,path);
   this.nodeType = 'Links';
-  this.rootPath = '#';
   this._links = [];
 }
 inherit(Links,Node);
@@ -89,10 +100,6 @@ Links.prototype.parse = function(obj){
   for (var i=0;i<obj.length;++i){
     var link = obj[i]
     if (this.isReference(link)) continue;
-    if ("root" == link.rel.toLowerCase()){
-      this.rootPath = link.href;
-      continue;
-    }
     this.addLink(link);
   }
   return this;
@@ -164,17 +171,15 @@ Links.prototype.addLink = function(obj){
 }
 
 Links.prototype.resolve = function(instance){
-  var rootPath = this.rootPath
-    , root = getPath(instance,rootPath || '#') || instance
-    , ret
-  if ('array' == type(root)){
+  var ret
+  if ('array' == type(instance)){
     ret = []
     var self = this;
-    each(root, function(record){
+    each(instance, function(record){
       ret.push( resolvedLinksFor.call(self,record) );
     })
   } else {
-    ret = resolvedLinksFor.call(this,root);
+    ret = resolvedLinksFor.call(this,instance);
   }
   return ret;
 }
@@ -313,16 +318,3 @@ Media.prototype.has = function(key){
 
 
 // utils
-
-function getPath(obj,ref){
-  var parts = ref.split('/');
-  for (var i=0;i<parts.length;++i){
-    if ('#' == parts[i]) continue;
-    obj = obj[parts[i]];
-    if (obj == undefined) break;
-    if ("object" !== typeof obj) break;  // not object or array
-  }
-  return obj;
-}
-
-

@@ -2,6 +2,7 @@ var assert = require('timoxley-assert')
   , core  = require('json-schema-core')
   , links = require('json-schema-hyper')
   , Schema = core.Schema
+  , Document = core.Document
   , type = require('type')
 
 Schema.use(links);
@@ -34,10 +35,6 @@ describe('json-schema-hyper', function(){
       assert("application/vnd-color+json" == this.subject.$('#/links/2').get('mediaType'));
     })
 
-    it('should have default root path (#)', function(){
-      assert('#' == this.subject.get('links').rootPath);
-    })
-    
     it('links should default method to GET', function(){
       assert('GET' == this.subject.get('links').get(0).get('method'));
       assert('GET' == this.subject.get('links').get(1).get('method'));
@@ -56,14 +53,9 @@ describe('json-schema-hyper', function(){
       console.log("subject: %o", this.subject);
     })
 
-    it('should parse root link as property of the links', function(){
-      assert('#/items/root' == this.subject.get('links').rootPath);
-    })
-
-    it('should not create a link object in the tree for the root link', function(){
+    it('should parse root link as a normal link', function(){
       var links = this.subject.get('links')
-      assert(links);
-      assert(!links.has('root'));
+      assert(links.rel('root'));
     })
 
   })
@@ -140,39 +132,6 @@ describe('json-schema-hyper', function(){
       assert(act[2].get(2).get('href') == "http://example.com/thing/901/color/cyan");
     })
 
-  })
-
-  describe('resolve links, specified root', function(){
-
-    beforeEach(function(){
-      this.subject = new Schema().parse(fixtures.parse.rootlink);
-      this.instance = fixtures.instance.rootlink;
-    })
-
-    it('should resolve each link', function(){
-      var act = this.subject.resolveLinks(this.instance);
-      console.log("resolved links: %o", act);
-      assert(act.get(0).get('href') == "http://example.com/thing");
-      assert(act.get(1).get('href') == "http://example.com/thing/123");
-      assert(act.get(2).get('href') == "http://example.com/thing/123/color/mauve");
-    })
-
-  })
-
-  describe('resolve links, specified root not in instance', function(){
-    
-    beforeEach(function(){
-      this.subject = new Schema().parse(fixtures.parse.rootlink);
-      this.instance = fixtures.instance.simple;
-    })
-
-    it('should resolve against entire instance', function(){
-      var act = this.subject.resolveLinks(this.instance);
-      assert(act.get(0).get('href') == "http://example.com/thing");
-      assert(act.get(1).get('href') == "http://example.com/thing/123");
-      assert(act.get(2).get('href') == "http://example.com/thing/123/color/mauve");
-    })
- 
   })
 
   describe('find link by rel', function(){
@@ -315,6 +274,21 @@ describe('json-schema-hyper', function(){
 
   })
 
+  describe('correlations, root link specified', function(){
+    beforeEach(function(){
+      var schema = new Schema().parse(fixtures.parse.rootlink);
+      this.subject = schema.bind(fixtures.instance.rootlink);
+    })
+
+    it('correlation should get root', function(){
+      var act = this.subject.getRoot();
+      console.log('correlation: %o', act);
+      assert(act);
+      assert('#/properties/items/properties/root' == act.schema.path);
+      assert.deepEqual(act.instance, fixtures.instance.simple);
+    })
+
+  })
 
 })
 
@@ -335,7 +309,15 @@ fixtures.parse.rootlink = {
     { rel: "self",  href: "http://example.com/thing/{id}" },
     { rel: "color", href: "http://example.com/thing/{id}/color/{color}", mediaType: "application/vnd-color+json" },
     { rel: "root",  href: "#/items/root" } 
-  ]
+  ],
+  properties: {
+    items: {
+      type: "object",
+      properties: {
+        root: {}
+      }
+    }
+  }
 }
 
 fixtures.parse.unknowns = {
@@ -377,6 +359,8 @@ fixtures.instance.multi = [
 ]
 
 fixtures.instance.rootlink = {
+  id: 234,
+  color: "guava",
   items: {
     root: fixtures.instance.simple
   }
