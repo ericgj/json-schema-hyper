@@ -149,7 +149,7 @@ Links.prototype.select = function(fn){
 }
 
 Links.prototype.each = function(fn){
-  each(this._links,fn);
+  each(this._links, function(link,i){ fn(i,link); });
 }
 
 Links.prototype.get = function(i){
@@ -188,7 +188,7 @@ Links.prototype.resolve = function(instance){
 
 function resolvedLinksFor(instance){
   var ret = new Links();
-  this.each(function(link){
+  this.each(function(i,link){
     var resolved = link.resolve(instance);
     if (resolved) ret.set(resolved);
   })

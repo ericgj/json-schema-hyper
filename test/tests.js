@@ -92,7 +92,7 @@ describe('json-schema-hyper', function(){
     it('should not resolve links with unknown variable', function(){
       var act = this.subject.resolveLinks(this.instance);
       console.log("resolved links: %o", act);
-      act.each( function(link){
+      act.each( function(i,link){
         assert(link.get('rel') !== 'one');
         assert(link.get('rel') !== 'two');
         assert(link.get('rel') !== 'three');
