@@ -96,7 +96,6 @@ function Links(doc,path){
 inherit(Links,Node);
 
 Links.prototype.parse = function(obj){
-  this.dereference(obj);
   for (var i=0;i<obj.length;++i){
     var link = obj[i]
     if (this.isReference(link)) continue;
@@ -205,7 +204,6 @@ function Link(doc,path){
 inherit(Link,Node);
 
 Link.prototype.parse = function(obj){
-  this.dereference(obj);
   this.set('method','GET');  // default
   for (var key in obj) {
     if (this.isReference(obj[key])) continue;
@@ -291,7 +289,6 @@ function Media(doc,path){
 inherit(Media,Node);
 
 Media.prototype.parse = function(obj){
-  this.dereference(obj);
   for (var key in obj){
     var attr = obj[key];
     if (this.isReference(attr)) continue;
