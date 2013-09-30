@@ -88,8 +88,8 @@ function getRootBinding(){
 
 ///// Links
 
-function Links(doc,path){
-  Node.call(this,doc,path);
+function Links(parent){
+  Node.call(this,parent);
   this.nodeType = 'Links';
   this._links = [];
 }
@@ -98,7 +98,8 @@ inherit(Links,Node);
 Links.prototype.parse = function(obj){
   for (var i=0;i<obj.length;++i){
     var link = obj[i]
-    if (this.isReference(link)) continue;
+      , ref = refOf(link)
+    if (ref) { this.addRef(ref,i); continue; }
     this.addLink(link);
   }
   return this;
@@ -164,8 +165,7 @@ Links.prototype.has = function(i){
 }
 
 Links.prototype.addLink = function(obj){
-  var path = [this.path,this._links.length].join('/')
-    , link = new Link(this.document,path).parse(obj);
+  var link = new Link(this).parse(obj);
   this.set(link);
 }
 
@@ -196,8 +196,8 @@ function resolvedLinksFor(instance){
 
 ///// Link
 
-function Link(doc,path){
-  Node.call(this,doc,path);
+function Link(parent){
+  Node.call(this,parent);
   this.nodeType = 'Link';
   this._attributes = {};
 }
@@ -206,8 +206,10 @@ inherit(Link,Node);
 Link.prototype.parse = function(obj){
   this.set('method','GET');  // default
   for (var key in obj) {
-    if (this.isReference(obj[key])) continue;
-    this.set(key,obj[key]);
+    var attr = obj[key]
+      , ref = refOf(attr)
+    if (ref) { this.addRef(ref,key); continue; }
+    this.set(key,attr);
   }
   return this;
 }
@@ -243,8 +245,7 @@ Link.prototype.attributes = function(){
 }
 
 Link.prototype.parseSchema = function(key,obj){
-  var path = [this.path,key].join('/')
-    , schema = new Schema(this.document,path).parse(obj)
+  var schema = new Schema(this).parse(obj)
   return schema;
 }
 
@@ -281,8 +282,8 @@ function linkTemplateExpandable(tmpl,instance){
 
 //////// Media
 
-function Media(doc,path){
-  Node.call(this,doc,path);
+function Media(parent){
+  Node.call(this,parent);
   this.nodeType = "Media";
   this._attributes = {};
 }
@@ -290,8 +291,9 @@ inherit(Media,Node);
 
 Media.prototype.parse = function(obj){
   for (var key in obj){
-    var attr = obj[key];
-    if (this.isReference(attr)) continue;
+    var attr = obj[key]
+      , ref = refOf(attr)
+    if (ref) { this.addRef(ref,key); continue; }
     this.set(key,attr);
   }
   return this;
@@ -315,3 +317,7 @@ Media.prototype.has = function(key){
 
 
 // utils
+
+function refOf(obj){
+  return ("object"==type(obj) && obj['$ref']);
+}

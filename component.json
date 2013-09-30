@@ -2,10 +2,10 @@
   "name": "json-schema-hyper",
   "repo": "ericgj/json-schema-hyper",
   "description": "JSON Schema hypermedia (URI templating)",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "keywords": [],
   "dependencies": {
-    "ericgj/json-schema-core": "*",  
+    "ericgj/json-schema-core": "edge",  
     "ericgj/uritemplate": "*",
     "component/inherit": "*",
     "component/each": "*",

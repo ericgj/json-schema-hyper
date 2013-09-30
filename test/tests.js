@@ -30,9 +30,9 @@ describe('json-schema-hyper', function(){
     })
 
     it('should have links addressable from the schema by index', function(){
-      assert("list" == this.subject.$('#/links/0').get('rel'));
-      assert("http://example.com/thing/{id}" == this.subject.$('#/links/1').get('href'));
-      assert("application/vnd-color+json" == this.subject.$('#/links/2').get('mediaType'));
+      assert("list" == this.subject.getPath('links/0').get('rel'));
+      assert("http://example.com/thing/{id}" == this.subject.getPath('links/1').get('href'));
+      assert("application/vnd-color+json" == this.subject.getPath('links/2').get('mediaType'));
     })
 
     it('links should default method to GET', function(){
@@ -75,9 +75,9 @@ describe('json-schema-hyper', function(){
 
     it('should resolve each link', function(){
       var act = this.subject.resolveLinks(this.instance);
-      assert(act.$('0/href') == "http://example.com/thing");
-      assert(act.$('1/href') == "http://example.com/thing/123");
-      assert(act.$('2/href') == "http://example.com/thing/123/color/mauve");
+      assert(act.getPath('0/href') == "http://example.com/thing");
+      assert(act.getPath('1/href') == "http://example.com/thing/123");
+      assert(act.getPath('2/href') == "http://example.com/thing/123/color/mauve");
     })
 
   })
@@ -229,9 +229,9 @@ describe('json-schema-hyper', function(){
 
     it('correlation should resolve each link', function(){
       var act = this.subject.links();
-      assert(act.$('0/href') == "http://example.com/thing");
-      assert(act.$('1/href') == "http://example.com/thing/123");
-      assert(act.$('2/href') == "http://example.com/thing/123/color/mauve");
+      assert(act.getPath('0/href') == "http://example.com/thing");
+      assert(act.getPath('1/href') == "http://example.com/thing/123");
+      assert(act.getPath('2/href') == "http://example.com/thing/123/color/mauve");
     })
 
     it('correlation should find link by rel', function(){
@@ -255,9 +255,9 @@ describe('json-schema-hyper', function(){
     it('links should return array of resolved links for each element of array', function(){
       var act = this.subject.links();
       assert('array' == type(act));
-      assert(act[2].$('0/href') == "http://example.com/thing");
-      assert(act[2].$('1/href') == "http://example.com/thing/901");
-      assert(act[2].$('2/href') == "http://example.com/thing/901/color/cyan");
+      assert(act[2].getPath('0/href') == "http://example.com/thing");
+      assert(act[2].getPath('1/href') == "http://example.com/thing/901");
+      assert(act[2].getPath('2/href') == "http://example.com/thing/901/color/cyan");
     })
 
     it('correlation should return array of found link by rel', function(){
@@ -284,7 +284,6 @@ describe('json-schema-hyper', function(){
       var act = this.subject.getRoot();
       console.log('correlation: %o', act);
       assert(act);
-      assert('#/properties/items/properties/root' == act.schema.path);
       assert.deepEqual(act.instance, fixtures.instance.simple);
     })
 
