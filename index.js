@@ -32,7 +32,8 @@ module.exports = function(target){
 ///// methods to be bound to Correlation objects
 
 function linksBinding(){
-  return this.schema.resolveLinks(this.instance);
+  return this.resolveLinks ? this.resolveLinks()
+                           : this.schema.resolveLinks(this.instance);
 }
 
 function relBinding(rel,filter){
