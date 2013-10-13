@@ -1,6 +1,8 @@
 
 # json-schema-hyper
 
+**Please note this library is not ready for production use.**
+
 JSON Hyper-Schema, as specified in the [IETF Draft spec][spec].
 
 This component extends the behavior of JSON Schema, as implemented in 
