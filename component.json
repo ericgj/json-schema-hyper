@@ -11,7 +11,8 @@
     "component/each": "*",
     "component/type": "*",
     "component/select": "*",
-    "component/find": "*"
+    "component/find": "*",
+    "forbeslindesay/is-browser": "*"
   },
   "development": {
     "timoxley/assert": "*"  

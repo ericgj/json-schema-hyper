@@ -1,9 +1,12 @@
-var assert = require('timoxley-assert') 
-  , core  = require('json-schema-core')
-  , links = require('json-schema-hyper')
+'use strict';
+
+var isBrowser = require('is-browser')
+  , assert = require('assert') 
+  , core  = isBrowser ? require('json-schema-core') : require('json-schema-core-component')
+  , links = isBrowser ? require('json-schema-hyper') : require('json-schema-hyper-component')
   , Schema = core.Schema
   , Document = core.Document
-  , type = require('type')
+  , type = isBrowser ? require('type') : require('component-type')
 
 Schema.use(links);
 

@@ -1,0 +1,31 @@
+{
+  "name": "json-schema-hyper-component",
+  "version": "0.0.16",
+  "description": "JSON Schema hypermedia (URI templating)",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --ui bdd test/tests.js"
+  },
+  "dependencies": {
+    "json-schema-core": "https://github.com/ericgj/json-schema-core/tarball/master",
+    "uritemplate": "https://github.com/ericgj/uritemplate/tarball/master",
+    "each-component": "https://github.com/component/each/tarball/master",  
+    "component-type": "https://github.com/component/type/tarball/master",
+    "inherit-component": "https://github.com/component/inherit/tarball/master",
+    "find": "https://github.com/component/find/tarball/master",
+    "select-component": "https://github.com/component/select/tarball/master",
+    "is-browser": "https://github.com/forbeslindesay/is-browser/tarball/master"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ericgj/json-schema-core.git"
+  },
+  "author": "Eric Gjertsen",
+  "license": "MIT"
+}

@@ -1,10 +1,14 @@
-var core = require('json-schema-core')
+'use strict';
+
+var isBrowser = require('is-browser')
+  , core = isBrowser ? require('json-schema-core') : require('json-schema-core-component')
   , uritemplate = require('uritemplate')
   , Node = core.Node
-  , inherit = require('inherit')
-  , each = require('each')
-  , type = require('type')
-  , select = require('select')
+  , Schema = core.Schema
+  , inherit = isBrowser ? require('inherit') : require('inherit-component')
+  , each = isBrowser ? require('each') : require('each-component')
+  , type = isBrowser ? require('type') : require('component-type')
+  , select = isBrowser ? require('select') : require('select-component')
   , find   = require('find')
   , has  = Object.hasOwnProperty
 
