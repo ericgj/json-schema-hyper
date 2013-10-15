@@ -8,7 +8,7 @@ JSON Hyper-Schema, as specified in the [IETF Draft spec][spec].
 This component extends the behavior of JSON Schema, as implemented in 
 [json-schema-core][core], providing 
 
-- parser classes for links (`Links`, `Link`) and media (`Media`). 
+- parser classes for links (`Links`, `Link`). 
 - a method for resolving link templates against an instance (`resolveLinks`)
 - link finder methods for typical cases (`links.rel`, `links.mediaType`,
 `links.alternate`), as well as generic `links.find(fn)` and `links.select(fn)`
@@ -28,7 +28,13 @@ forthcoming).
 
 ## Installation
 
+component:
+
     $ component install ericgj/json-schema-hyper
+
+npm:
+
+    $ npm install json-schema-hyper-component
 
 
 ## Example
