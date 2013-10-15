@@ -13,7 +13,7 @@ var core = require('json-schema-core')
 module.exports = function(target){
 
   target.addType('links', Links);
-  target.addType('media', Media);
+  // target.addType('media', Media);
 
   target.addBinding('links', linksBinding);
   target.addBinding('rel', relBinding);
@@ -170,6 +170,14 @@ Links.prototype.addLink = function(obj){
   this.set(link);
 }
 
+Links.prototype.toObject = function(){
+  var obj = []
+  this.each( function(i,link){
+    obj.push(link.toObject());
+  })
+  return obj;
+}
+
 Links.prototype.resolve = function(instance){
   var ret
   if ('array' == type(instance)){
@@ -250,6 +258,21 @@ Link.prototype.parseSchema = function(key,obj){
   return schema;
 }
 
+Link.prototype.toObject = function(){
+  var obj = {}
+  this.each( function(key,val){
+    switch(key){
+      case "schema" || "targetSchema":
+        obj[key] = val.toObject();
+        break;
+      default:
+        obj[key] = val;
+        break;
+    }
+  })
+  return obj;
+}
+
 Link.prototype.resolve = function(instance){
   var obj = {}
     , href = this.get('href')
@@ -278,42 +301,6 @@ function linkTemplateExpandable(tmpl,instance){
     }
   }
   return true;
-}
-
-
-//////// Media
-
-function Media(parent){
-  Node.call(this,parent);
-  this.nodeType = "Media";
-  this._attributes = {};
-}
-inherit(Media,Node);
-
-Media.prototype.parse = function(obj){
-  for (var key in obj){
-    var attr = obj[key]
-      , ref = refOf(attr)
-    if (ref) { this.addRef(ref,key); continue; }
-    this.set(key,attr);
-  }
-  return this;
-}
-
-Media.prototype.each = function(fn){
-  each(this._attributes, fn);
-}
-
-Media.prototype.get = function(key){
-  return this._attributes[key];
-}
-
-Media.prototype.set = function(key,val){
-  this._attributes[key] = val;
-}
-
-Media.prototype.has = function(key){
-  return (has.call(this._attributes,key));
 }
 
 

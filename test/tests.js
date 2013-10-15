@@ -289,6 +289,21 @@ describe('json-schema-hyper', function(){
 
   })
 
+  /* Note serialization does not produce identical object as original;
+     for instance, the link method = "GET" is defaulted, and link rels
+     are lowercased.  But the test fixture here is chosen to produce an
+     identical object for ease in testing.
+  */
+  describe('serialization', function(){
+    it('should serialize', function(){
+      var subject = new Schema().parse(fixtures.serialize.all)
+        , act = subject.toObject()
+      console.log('serialize: %o', act);
+      assert(act);
+      assert.deepEqual(act,fixtures.serialize.all);
+    })
+  })
+
 })
 
 fixtures.parse = {};
@@ -365,4 +380,21 @@ fixtures.instance.rootlink = {
   }
 }
 
+
+fixtures.serialize = {};
+fixtures.serialize.all = {
+  links: [
+    { rel: "one", href: "/{one}", method: "GET" },
+    { rel: "two", href: "/{two}", method: "POST", 
+      targetSchema: { required: ["one", "two"] },
+      schema: { }
+    }
+  ],
+  media: { 
+    type: "string", 
+    media: {
+      mediaType: "text/html"
+    }
+  }
+}
 
