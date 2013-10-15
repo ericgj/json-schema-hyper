@@ -13,7 +13,6 @@ var core = require('json-schema-core')
 module.exports = function(target){
 
   target.addType('links', Links);
-  // target.addType('media', Media);
 
   target.addBinding('links', linksBinding);
   target.addBinding('rel', relBinding);
