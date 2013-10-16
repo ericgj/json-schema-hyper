@@ -160,8 +160,13 @@ Links.prototype.get = function(i){
   return this._links[i];
 }
 
-Links.prototype.set = function(link){
-  this._links.push(link);
+Links.prototype.set = function(i,link){
+  if (arguments.length == 1){
+    link = i; i = undefined;
+    this._links.push(link);
+  } else {
+    this._links[i] = link;
+  }
 }
 
 Links.prototype.has = function(i){
