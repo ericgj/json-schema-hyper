@@ -1,6 +1,6 @@
 {
   "name": "json-schema-hyper-component",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "JSON Schema hypermedia (URI templating)",
   "main": "index.js",
   "directories": {
