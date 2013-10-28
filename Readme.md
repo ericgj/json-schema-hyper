@@ -22,8 +22,8 @@ validation, setting Accept headers, instance correlation via HTTP response
 headers, etc. For this, see [json-schema-agent][agent].
 
 Note also this component does not depend on JSON Schema *validation*, which
-is implemented as a separate [core][core] plugin (json-schema-valid, 
-forthcoming).
+is implemented as a separate [core][core] plugin 
+([json-schema-valid][valid]).
 
 
 ## Installation
@@ -63,22 +63,33 @@ npm:
   // with method == 'GET'
   var rssLink = links.alternate('application/atom+xml', {method: 'GET'});
 
-  // GET the searchLink href, with the given params, setting the Accept header, 
-  // validating schema and targetSchema, if given and validation is used, etc.
-  searchLink.fetch({name: 'Kermit'}, callback);
+
+  // or simply use correlation methods as shortcuts to the above
+
+  var correlation = schema.bind(instanceObject);
  
- 
+  correlation.links();
+  correlation.rel('search');
+  correlation.mediaType('application/xml');
+  correlation.alternate('application/atom+xml', {method: 'GET'});
+  
   ```
 
 ## API
    
 
+## TODO
+
+  - Add pre-processing of URI templates, as defined in 
+    [section 5.1.1.1][spec-preproc] of the spec.
+  
 ## License
 
   MIT
 
 [spec]: http://tools.ietf.org/html/draft-luff-json-hyper-schema-00
+[spec-preproc]: http://tools.ietf.org/html/draft-luff-json-hyper-schema-00#section-5.1.1
 [core]: https://github.com/ericgj/json-schema-core
 [agent]: https://github.com/ericgj/json-schema-agent
-
+[valid]: https://github.com/ericgj/json-schema-valid
 
