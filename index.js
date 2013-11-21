@@ -242,8 +242,13 @@ Link.prototype.get = function(key){
 
 Link.prototype.set = function(key,val){
   switch(key){
-    case "schema" || "targetSchema":
-      this._attributes[key] = this.parseSchema(key,val);
+    case "schema":
+    case "targetSchema":
+      if (val.nodeType && val.nodeType == 'Schema'){
+        this._attributes[key] = val;
+      } else {
+        this._attributes[key] = this.parseSchema(key,val);
+      }
       break;
     case "rel":
       this._attributes[key] = val.toLowerCase();
@@ -270,7 +275,8 @@ Link.prototype.toObject = function(){
   var obj = {}
   this.each( function(key,val){
     switch(key){
-      case "schema" || "targetSchema":
+      case "schema":
+      case "targetSchema":
         obj[key] = val.toObject();
         break;
       default:

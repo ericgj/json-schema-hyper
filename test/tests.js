@@ -221,7 +221,31 @@ describe('json-schema-hyper', function(){
   })
 
   describe('link schema and targetSchema parsing', function(){
-    it('should have tests');
+    
+    it('should not double-parse link schema when resolving links', function(){
+      var subject = new Schema().parse(fixtures.parse.schema)
+        , instance = fixtures.instance.simple
+        , exp = subject.get('links').get(0).get('schema')
+        , links = subject.resolveLinks(instance)
+        , act = links.get(0).get('schema')
+      console.log('link schema after resolveLinks: %o', act);
+      assert(exp);
+      assert.deepEqual(act, exp);
+      assert(act instanceof Schema);
+    })
+
+    it('should not double-parse link targetSchema when resolving links', function(){
+      var subject = new Schema().parse(fixtures.parse.targetSchema)
+        , instance = fixtures.instance.simple
+        , exp = subject.get('links').get(0).get('targetSchema')
+      var links = subject.resolveLinks(instance)
+        , act = links.get(0).get('targetSchema')
+      console.log('link targetSchema after resolveLinks: %o', act);
+      assert(exp);
+      assert.deepEqual(act, exp);
+      assert(act instanceof Schema);
+    })
+
   })
   
   describe('correlations', function(){
@@ -360,6 +384,28 @@ fixtures.parse.caseInsensitive = {
     { rel: "LIST",  href: "http://example.com/thing" },
     { rel: "Self",  href: "http://example.com/thing/{id}" },
     { rel: "coLOR", href: "http://example.com/thing/{id}/color/{color}", mediaType: "application/vnd-color+json" },
+  ]
+}
+
+fixtures.parse.schema = {
+  links: [
+    { rel: "search", 
+      href: "http://example.com/things{?color}",
+      schema: {
+        required: ["one","two"]
+      }
+    }
+  ]
+}
+
+fixtures.parse.targetSchema = {
+  links: [
+    { rel: "target", 
+      href: "http://example.com/things{?color}",
+      targetSchema: {
+        required: ["one","two"]
+      }
+    }
   ]
 }
 
